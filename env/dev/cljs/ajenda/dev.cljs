@@ -1,10 +1,10 @@
 (ns ^:figwheel-no-load ajenda.dev
   (:require
-    [ajenda.core :as core]
+    [ajenda.test-page :as test-page]
     [devtools.core :as devtools]))
 
 (devtools/install!)
 
 (enable-console-print!)
 
-(core/init!)
+(test-page/init!)

@@ -1,9 +1,5 @@
 (ns ajenda.core
-  (:require [reagent.core :as r]
-            [reagent.ratom :as ratom]
-              [secretary.core :as secretary :include-macros true]
-              [accountant.core :as accountant]))
-
+  (:require [reagent.core :as r]))
 
 (defn $ [this]
   (-> this
@@ -59,8 +55,7 @@
     (-> opts
         (update :dayClick (fn [orig-fn]
                             (fn [d p v]
-                              (do
-                                (orig-fn d p v)))))
+                              (orig-fn d p v))))
         (format-cal-opts))))
 
 ;; -------------------------
@@ -118,49 +113,3 @@
         :reagent-render
         (fn [_]
           [:div.calendar])})))
-
-#_(defn calendar-with-ui []
-  (let))
-
-;; -------------------------
-;; Views
-
-(defn home-page []
-  [:div [:h2 "Welcome to ajenda"]
-   [calendar events  #_{:events events-fn}]
-   [:div [:a {:href "/about"} "go to about page"]]])
-
-(defn about-page []
-  [:div [:h2 "About ajenda"]
-   [:div [:a {:href "/"} "go to the home page"]]])
-
-;; -------------------------
-;; Routes
-
-(defonce page (atom #'home-page))
-
-(defn current-page []
-  [:div [@page]])
-
-(secretary/defroute "/" []
-  (reset! page #'home-page))
-
-(secretary/defroute "/about" []
-  (reset! page #'about-page))
-
-;; -------------------------
-;; Initialize app
-
-(defn mount-root []
-  (r/render [current-page] (.getElementById js/document "app")))
-
-(defn init! []
-  (accountant/configure-navigation!
-    {:nav-handler
-     (fn [path]
-       (secretary/dispatch! path))
-     :path-exists?
-     (fn [path]
-       (secretary/locate-route path))})
-  (accountant/dispatch-current!)
-  (mount-root))
