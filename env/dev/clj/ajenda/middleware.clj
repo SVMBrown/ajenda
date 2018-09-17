@@ -1,10 +1,10 @@
 (ns ajenda.middleware
-  (:require [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+  (:require [ajenda.middleware.common :refer [wrap-common]]
             [prone.middleware :refer [wrap-exceptions]]
             [ring.middleware.reload :refer [wrap-reload]]))
 
 (defn wrap-middleware [handler]
   (-> handler
-      (wrap-defaults site-defaults)
+      (wrap-common)
       wrap-exceptions
       wrap-reload))

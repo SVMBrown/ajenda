@@ -6,6 +6,7 @@
 
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [ring-server "0.5.0"]
+                 [ring-webjars "0.2.0"]
                  [reagent "0.8.1"]
                  [reagent-utils "0.3.1"]
                  [ring "1.6.3"]
@@ -15,6 +16,7 @@
                  [yogthos/config "1.1.1"]
                  [org.clojure/clojurescript "1.10.339"
                   :scope "provided"]
+                 [org.webjars.bowergithub.fullcalendar/fullcalendar "3.9.0"]
                  [secretary "1.2.3"]
                  [venantius/accountant "0.2.4"
                   :exclusions [org.clojure/tools.reader]]]

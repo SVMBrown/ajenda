@@ -1,5 +1,5 @@
 (ns ajenda.middleware
-  (:require [ring.middleware.defaults :refer [site-defaults wrap-defaults]]))
+  (:require [ajenda.middleware.common :refer [wrap-common]]))
 
 (defn wrap-middleware [handler]
-  (wrap-defaults handler site-defaults))
+  (wrap-common handler))

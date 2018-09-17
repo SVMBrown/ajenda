@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [GET defroutes]]
             [compojure.route :refer [not-found resources]]
             [hiccup.page :refer [include-js include-css html5]]
+            [ajenda.assets :refer [ajenda-css ajenda-js]]
             [ajenda.middleware :refer [wrap-middleware]]
             [config.core :refer [env]]))
 
@@ -17,6 +18,7 @@
    [:meta {:charset "utf-8"}]
    [:meta {:name "viewport"
            :content "width=device-width, initial-scale=1"}]
+   (ajenda-css)
    (include-css (if (env :dev) "/css/site.css" "/css/site.min.css"))])
 
 (defn loading-page []
@@ -24,13 +26,13 @@
     (head)
     [:body {:class "body-container"}
      mount-target
+     (ajenda-js)
      (include-js "/js/app.js")]))
 
 
 (defroutes routes
   (GET "/" [] (loading-page))
   (GET "/about" [] (loading-page))
-  
   (resources "/")
   (not-found "Not Found"))
 
