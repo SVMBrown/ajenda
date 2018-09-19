@@ -21,10 +21,8 @@
                      (callback @events))
      :event-render (fn [event element]
                      (.attr element "title" (.-tip event)))
-     :event-click  (fn [event js-event view]
-                     (js/console.log event)
-                     event
-                     nil)
+     :event-click  (fn [event view]
+                     (assoc event :start (js/Date.parse "04 Sep 2018 00:12:00 GMT" )))
      :select       (fn [start end event view]
                      (let [event {:title (str "Test " (rand-int 1000))
                                   :start start

@@ -18,15 +18,20 @@
   "removes the event from calendar when the click handler returns nil"
   [f calendar]
   (fn [event js-event view]
-    (let [id (.-_id event)]
-      (when-not (f event js-event view)
+    (let [id            (.-_id event)
+          updated-event (f (js->clj event) view)]
+      (if updated-event
+        (do
+          (doseq [[k v] (select-keys updated-event [:start :end :tip :title])]
+            (goog.object/set event (name k) (clj->js v)))
+          (.fullCalendar calendar "updateEvent" event))
         (.fullCalendar calendar "removeEvents" id)))))
 
 (defn wrap-rerender-events
-  "calls the select function and paints the even with the result"
+  "calls the select function and paints the event with the result"
   [f calendar]
-  (fn [& args]
-    (when-let [event (apply f args)]
+  (fn [start end event view]
+    (when-let [event (f start end (js->clj event) view)]
       (.fullCalendar calendar "renderEvent" (clj->js event)))))
 
 (defn rename-keys [opts]
