@@ -1,5 +1,6 @@
 (ns ajenda.core
   (:require
+    [clojure.set :refer [rename-keys]]
     [clojure.string :as string]
     [clojure.walk :refer [postwalk]]
     [reagent.core :as r]
@@ -18,35 +19,47 @@
   (fn [start end timezone callback]
     (f start end timezone #(callback (clj->js %)))))
 
+(defn parse-event [calendar-event]
+  (some-> (js->clj-keywordized calendar-event)
+          (rename-keys {:_id :id})
+          (update :id keyword)))
+
+(defn unparse-event [model-event]
+  (some-> (rename-keys model-event {:id :_id})
+          (clj->js)))
+
 (defn wrap-event-click
   "removes the event from calendar when the click handler returns nil"
   [f calendar]
   (fn [event js-event view]
-    (let [id            (.-_id event)
-          updated-event (f (js->clj-keywordized event) view)]
-      (if updated-event
-        (do
-          (doseq [[k v] (select-keys updated-event [:start :end :tip :title])]
-            (goog.object/set event (name k) (clj->js v)))
-          (.fullCalendar calendar "updateEvent" event))
-        (.fullCalendar calendar "removeEvents" id)))))
+    (let [id (.-_id event)]
+      (f (parse-event event) view
+         (fn [updated-event]
+           (if updated-event
+             (do
+               (doseq [[k v] (select-keys updated-event [:start :end :tip :title])]
+                 (goog.object/set event (name k) (clj->js v)))
+               (.fullCalendar calendar "updateEvent" event))
+             (.fullCalendar calendar "removeEvents" id)))))))
 
-(defn wrap-rerender-events
+(defn wrap-event-render
   "calls the select function and paints the event with the result"
-  [f calendar]
-  (fn [start end event view]
-    (when-let [event (f start end (js->clj-keywordized event) view)]
-      (.fullCalendar calendar "renderEvent" (clj->js event)))))
+  [f]
+  (fn [event element view]
+    (f (parse-event event) element view)))
 
 (defn wrap-mouseover [f]
   (fn [event js-event view]
-    (f (js->clj-keywordized event) view)))
+    (f (parse-event event) view)))
 
-(defn wrap-event-render [f]
-  (fn [event element]
-    (f (js->clj-keywordized event) element)))
+(defn wrap-select [f calendar]
+  (fn [start end js-event view]
+    (when-let [event (f start end view)]
+      (println "new event:" event)
+      (js/console.log (unparse-event event))
+      (.fullCalendar calendar "renderEvent" (unparse-event event)))))
 
-(defn rename-keys [opts]
+(defn camel-case-event-keys [opts]
   (postwalk
     (fn [node]
       (if (keyword? node)
@@ -55,11 +68,11 @@
     opts))
 
 (defn parse-opts [calendar opts]
-  (-> (rename-keys opts)
+  (-> (camel-case-event-keys opts)
       (update :eventClick wrap-event-click calendar)
       (update :eventMouseover wrap-mouseover)
       (update :eventRender wrap-event-render)
-      (update :select wrap-rerender-events calendar)
+      (update :select wrap-select calendar)
       (update :events events-handler)
       (clj->js)))
 
