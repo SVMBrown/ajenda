@@ -2,10 +2,14 @@
   (:require
     [clojure.string :as string]
     [clojure.walk :refer [postwalk]]
-    [reagent.core :as r]))
+    [reagent.core :as r]
+    [reagent.dom.server :refer [render-to-static-markup]]))
 
 (defn $ [this]
   (-> this r/dom-node js/$))
+
+(defn js->clj-keywordized [v]
+  (js->clj v :keywordize-keys true))
 
 (defn ->camel-case [s]
   (string/replace s #"-{1,}\b." #(when-let [c (last %)] (.toUpperCase c))))
@@ -19,7 +23,7 @@
   [f calendar]
   (fn [event js-event view]
     (let [id            (.-_id event)
-          updated-event (f (js->clj event) view)]
+          updated-event (f (js->clj-keywordized event) view)]
       (if updated-event
         (do
           (doseq [[k v] (select-keys updated-event [:start :end :tip :title])]
@@ -31,8 +35,16 @@
   "calls the select function and paints the event with the result"
   [f calendar]
   (fn [start end event view]
-    (when-let [event (f start end (js->clj event) view)]
+    (when-let [event (f start end (js->clj-keywordized event) view)]
       (.fullCalendar calendar "renderEvent" (clj->js event)))))
+
+(defn wrap-mouseover [f]
+  (fn [event js-event view]
+    (f (js->clj-keywordized event) view)))
+
+(defn wrap-event-render [f]
+  (fn [event element]
+    (f (js->clj-keywordized event) element)))
 
 (defn rename-keys [opts]
   (postwalk
@@ -45,6 +57,8 @@
 (defn parse-opts [calendar opts]
   (-> (rename-keys opts)
       (update :eventClick wrap-event-click calendar)
+      (update :eventMouseover wrap-mouseover)
+      (update :eventRender wrap-event-render)
       (update :select wrap-rerender-events calendar)
       (update :events events-handler)
       (clj->js)))
