@@ -51,7 +51,7 @@
     :cljsbuild
     {:builds {:app
               {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
-               :figwheel     {:on-jsload "ajenda.core/mount-root"}
+               :figwheel     {:on-jsload "ajenda.test-page/mount-root"}
                :compiler     {:main          ajenda.dev
                               :asset-path    "/js/out"
                               :output-to     "target/cljsbuild/public/js/app.js"
