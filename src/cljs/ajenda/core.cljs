@@ -28,19 +28,29 @@
   (some-> (rename-keys model-event {:id :_id})
           (clj->js)))
 
+(defn save-event [calendar id event]
+  (if event
+    (do
+      (doseq [[k v] (select-keys event [:start :end :tip :title])]
+        (goog.object/set event (name k) (clj->js v)))
+      (.fullCalendar calendar "updateEvent" event))
+    (.fullCalendar calendar "removeEvents" id)))
+
 (defn wrap-event-click
   "removes the event from calendar when the click handler returns nil"
   [f calendar]
-  (fn [event js-event view]
-    (let [id (.-_id event)]
-      (f (parse-event event) view
-         (fn [updated-event]
-           (if updated-event
-             (do
-               (doseq [[k v] (select-keys updated-event [:start :end :tip :title])]
-                 (goog.object/set event (name k) (clj->js v)))
-               (.fullCalendar calendar "updateEvent" event))
-             (.fullCalendar calendar "removeEvents" id)))))))
+  (when f
+    (fn [event js-event view]
+      (let [id (.-_id event)]
+        (save-event calendar id (f id view))))))
+
+(defn wrap-event-click-async
+  "removes the event from calendar when the click handler returns nil"
+  [f calendar]
+  (when f
+    (fn [event js-event view]
+      (let [id (.-_id event)]
+        (f id view (fn [event] (save-event calendar id event)))))))
 
 (defn wrap-event-render
   "calls the select function and paints the event with the result"
@@ -67,9 +77,14 @@
         node))
     opts))
 
-(defn parse-opts [calendar opts]
+;todo handle having either eventClick or eventClickSync
+(defn parse-opts [calendar {:keys [event-click event-click-async] :as opts}]
   (-> (camel-case-event-keys opts)
-      (update :eventClick wrap-event-click calendar)
+      (assoc :eventClick
+             (if event-click
+               (wrap-event-click event-click calendar)
+               (wrap-event-click-async event-click-async calendar)))
+      (dissoc :eventClickSync)
       (update :eventMouseover wrap-mouseover)
       (update :eventRender wrap-event-render)
       (update :select wrap-select calendar)
