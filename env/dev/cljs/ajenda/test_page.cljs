@@ -54,36 +54,37 @@
              "close"]]))})))
 
 (defn home-page []
-  (r/with-let [event-popover? (r/atom false)]
-    [:div
-     [popover]
-     [ajenda/calendar
-      {:header           {:left   "prev, next today"
-                          :center "title"
-                          :right  "month,agendaWeek,agendaDay"}
-       :selectable       true
-       :events           (fn [start end timezone callback]
-                           (callback (event-map-to-list @events)))
-       :event-render     (fn [event element view]
-                           (.attr element "title" (:tip event)))
-       :event-click      (fn [id view save-cb]
-                           (let [model-event (get @events id)]
-                             (reset! event-details {:event model-event :save save-cb})
-                             model-event))
-       :event-click-sync (fn [id view save-cb]
-                           (let [model-event (get @events id)]
-                             model-event))
-       :event-mouseover  (fn [& args] #_(println "hello"))
-       :select           (fn [start end view]
-                           (let [event {:id    (keyword (str (.getTime (js/Date.))))
-                                        :title (str "Test " (rand-int 1000))
-                                        :start start
-                                        :end   end
-                                        :tip   "tip1"}]
-                             (add-event! events event)
-                             event))}]
+  [:div
+   [popover]
+   [ajenda/calendar
+    {:header          {:left   "prev, next today"
+                       :center "title"
+                       :right  "month,agendaWeek,agendaDay"}
+     :selectable      true
+     :events          (fn [start end timezone callback]
+                        (callback (event-map-to-list @events)))
+     :event-render    (fn [event element view]
+                        (.attr element "title" (:tip event)))
+     :event-click     (fn [id view save-cb]
+                        (println "id" id)
+                        (let [model-event (get @events id)]
+                          (println "model event" model-event)
+                          (reset! event-details {:event model-event :save save-cb})))
+     #_#_:event-click-sync (fn [id view]
+                             (let [model-event (get @events id)]
+                               (println model-event)
+                               model-event))
+     :event-mouseover (fn [& args] #_(println "hello"))
+     :select          (fn [start end view]
+                        (let [event {:id    (keyword (str (.getTime (js/Date.))))
+                                     :title (str "Test " (rand-int 1000))
+                                     :start start
+                                     :end   end
+                                     :tip   "tip1"}]
+                          (add-event! events event)
+                          event))}]
 
-     #_[:p (str @events)]]))
+   #_[:p (str @events)]])
 
 (defn mount-root []
   (r/render [home-page] (.getElementById js/document "app")))

@@ -36,21 +36,19 @@
       (.fullCalendar calendar "updateEvent" event))
     (.fullCalendar calendar "removeEvents" id)))
 
+(defn wrap-event-click-sync
+  "removes the event from calendar when the click handler returns nil"
+  [f calendar]
+  (fn [event js-event view]
+    (let [id (.-_id event)]
+      (save-event calendar id (f (keyword id) view)))))
+
 (defn wrap-event-click
   "removes the event from calendar when the click handler returns nil"
   [f calendar]
-  (when f
-    (fn [event js-event view]
-      (let [id (.-_id event)]
-        (save-event calendar id (f id view))))))
-
-(defn wrap-event-click-async
-  "removes the event from calendar when the click handler returns nil"
-  [f calendar]
-  (when f
-    (fn [event js-event view]
-      (let [id (.-_id event)]
-        (f id view (fn [event] (save-event calendar id event)))))))
+  (fn [event js-event view]
+    (let [id (.-_id event)]
+      (f (keyword id) view (fn [event] (save-event calendar id event))))))
 
 (defn wrap-event-render
   "calls the select function and paints the event with the result"
@@ -78,12 +76,15 @@
     opts))
 
 ;todo handle having either eventClick or eventClickSync
-(defn parse-opts [calendar {:keys [event-click event-click-async] :as opts}]
+(defn parse-opts [calendar {:keys [event-click event-click-sync] :as opts}]
   (-> (camel-case-event-keys opts)
       (assoc :eventClick
-             (if event-click
+             (cond
+               event-click
                (wrap-event-click event-click calendar)
-               (wrap-event-click-async event-click-async calendar)))
+               event-click-sync
+               (wrap-event-click-sync event-click-sync calendar)
+               :else (constantly nil)))
       (dissoc :eventClickSync)
       (update :eventMouseover wrap-mouseover)
       (update :eventRender wrap-event-render)
