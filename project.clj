@@ -42,8 +42,8 @@
     :resource-paths ["resources" "env/dev/resources" "target/cljsbuild"]
 
     :figwheel
-    {:server-port      3449
-     :nrepl-port       7002
+    {:server-port      3450
+     :nrepl-port       7003
      :nrepl-middleware [cider.piggieback/wrap-cljs-repl
                         cider.nrepl/cider-middleware]
      :css-dirs         ["resources/public/css" "env/dev/resources/public/css"]
