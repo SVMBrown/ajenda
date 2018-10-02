@@ -75,7 +75,15 @@
                                (println model-event)
                                model-event))
      :event-mouseover (fn [& args] #_(println "hello"))
-     :select          (fn [start end view]
+     :select          (fn [start end view cb]
+                        (let [event {:id    (keyword (str (.getTime (js/Date.))))
+                                     :title (str "Test " (rand-int 1000))
+                                     :start start
+                                     :end   end
+                                     :tip   "tip1"}]
+                          (add-event! events event)
+                          (cb event)))
+     :select-sync     (fn [start end view]
                         (let [event {:id    (keyword (str (.getTime (js/Date.))))
                                      :title (str "Test " (rand-int 1000))
                                      :start start
