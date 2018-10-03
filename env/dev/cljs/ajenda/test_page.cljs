@@ -2,16 +2,29 @@
   (:require [ajenda.core :as ajenda]
             [reagent.core :as r]))
 
-(def events (r/atom {:foo
-                     {:id    "event-1"
-                      :title "Test 1"
-                      :start (js/Date.)
-                      :tip   "tip1"}
-                     :bar
-                     {:id    "event-2"
-                      :title "Test 2"
-                      :start (js/Date.parse "04 Sep 2018 00:12:00 GMT")
-                      :tip   "tip1"}}))
+(defn make-draggable [event]
+  (assoc event
+    :z-index 999
+    :revert true
+    :revert-duration 0))
+
+(defn make-events-draggable [events]
+  (reduce-kv
+    (fn [events k v]
+      (assoc events k (make-draggable v)))
+    {} events))
+
+(def events (r/atom (make-events-draggable
+                      {:foo
+                       {:id    "event-1"
+                        :title "Test 1"
+                        :start (js/Date.)
+                        :tip   "tip1"}
+                       :bar
+                       {:id    "event-2"
+                        :title "Test 2"
+                        :start (js/Date.parse "04 Sep 2018 00:12:00 GMT")
+                        :tip   "tip1"}})))
 
 (def event-details (r/atom nil))
 
@@ -60,6 +73,8 @@
     {:header          {:left   "prev, next today"
                        :center "title"
                        :right  "month,agendaWeek,agendaDay"}
+     :editable        true
+     :droppable       true
      :selectable      true
      :events          (fn [start end timezone callback]
                         (callback (event-map-to-list @events)))
@@ -75,12 +90,15 @@
                                (println model-event)
                                model-event))
      :event-mouseover (fn [& args] #_(println "hello"))
+     :event-drop      (fn [& args]
+                        (println "dropped" args))
      :select          (fn [start end view cb]
-                        (let [event {:id    (keyword (str (.getTime (js/Date.))))
-                                     :title (str "Test " (rand-int 1000))
-                                     :start start
-                                     :end   end
-                                     :tip   "tip1"}]
+                        (let [event (make-draggable
+                                      {:id    (keyword (str (.getTime (js/Date.))))
+                                       :title (str "Test " (rand-int 1000))
+                                       :start start
+                                       :end   end
+                                       :tip   "tip1"})]
                           (add-event! events event)
                           (cb event)))
      :select-sync     (fn [start end view]

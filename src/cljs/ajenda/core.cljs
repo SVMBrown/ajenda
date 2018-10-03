@@ -104,14 +104,13 @@
       (clj->js)))
 
 (defn calendar [opts]
-  (let []
-    (r/create-class
-      {:display-name           "calendar"
-       :component-did-mount    (fn [this]
-                                 (let [calendar ($ this)]
-                                   (.fullCalendar calendar (parse-opts calendar opts))))
-       :component-did-update   (fn [this _]
-                                 (-> this $ (.fullCalendar "render")))
-       :component-will-unmount (fn [this]
-                                 (-> this $ (.fullCalendar "destroy")))
-       :reagent-render         (fn [_] [:div.calendar])})))
+  (r/create-class
+    {:display-name           "calendar"
+     :component-did-mount    (fn [this]
+                               (let [calendar ($ this)]
+                                 (.fullCalendar calendar (parse-opts calendar opts))))
+     :component-did-update   (fn [this _]
+                               (-> this $ (.fullCalendar "render")))
+     :component-will-unmount (fn [this]
+                               (-> this $ (.fullCalendar "destroy")))
+     :reagent-render         (fn [_] [:div.calendar])}))
