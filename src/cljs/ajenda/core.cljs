@@ -69,6 +69,14 @@
            (when event
              (.fullCalendar calendar "renderEvent" (unparse-event event))))))))
 
+(defn wrap-event-drop [calendar f sync?]
+  (if sync?
+    (fn [event delta revert-fn js-event ui view]
+      (when-not (f (parse-event event) delta js-event ui view)
+        (revert-fn)))
+    (fn [event delta revert-fn js-event ui view]
+      (f (parse-event event) delta js-event ui view revert-fn))))
+
 (defn camel-case-event-keys [opts]
   (postwalk
     (fn [node]
@@ -78,7 +86,8 @@
     opts))
 
 (def event-wrappers
-  {"event-click"     wrap-event-click
+  {"event-drop"      wrap-event-drop
+   "event-click"     wrap-event-click
    "event-mouseover" wrap-mouseover
    "event-render"    wrap-event-render
    "select"          wrap-select

@@ -1,4 +1,4 @@
-(defproject ajenda "0.1.0"
+(defproject ajenda "0.1.1"
   :description "A Reagent Wrapper for Full Calendar "
   :url "https://github.com/SVMBrown/ajenda"
   :license {:name "MIT"
@@ -8,7 +8,9 @@
   [[org.clojure/clojure "1.9.0" :scope "provided"]
    [reagent "0.8.1"]
    [org.clojure/clojurescript "1.10.339" :scope "provided"]
-   [org.webjars.bowergithub.fullcalendar/fullcalendar "3.9.0"]]
+   [org.webjars.bowergithub.fullcalendar/fullcalendar "3.9.0"
+    :exclusions [org.webjars.bowergithub.jquery/jquery-dist
+                 org.webjars.bowergithub.moment/moment]]]
 
   :plugins
   [[lein-cljsbuild "1.1.7"]
