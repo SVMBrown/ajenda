@@ -98,7 +98,6 @@
         event-id (string/replace key-name #"-sync$" "")
         sync?    (string/ends-with? key-name "-sync")
         wrapper  (get event-wrappers event-id)]
-    (println k wrapper)
     (if wrapper
       {(keyword event-id) (wrapper calendar handler sync?)}
       {k handler})))
