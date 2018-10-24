@@ -77,6 +77,10 @@
     (fn [event delta revert-fn js-event ui view]
       (f (parse-event event) delta js-event ui view revert-fn))))
 
+(defn wrap-event-default [calendar f sync?]
+  (fn [event js-event ui view]
+    (f (parse-event event) js-event ui view)))
+
 (defn camel-case-event-keys [opts]
   (postwalk
     (fn [node]
@@ -86,12 +90,17 @@
     opts))
 
 (def event-wrappers
-  {"event-drop"      wrap-event-drop
-   "event-click"     wrap-event-click
-   "event-mouseover" wrap-mouseover
-   "event-render"    wrap-event-render
-   "select"          wrap-select
-   "events"          events-handler})
+  {"event-drop"         wrap-event-drop
+   "event-drag-start"   wrap-event-default
+   "event-drag-stop"    wrap-event-default
+   "event-resize-start" wrap-event-default
+   "event-resize-stop"  wrap-event-default
+   "event-resize"       wrap-event-default
+   "event-click"        wrap-event-click
+   "event-mouseover"    wrap-mouseover
+   "event-render"       wrap-event-render
+   "select"             wrap-select
+   "events"             events-handler})
 
 (defn wrap-event [calendar [k handler]]
   (let [key-name (name k)
