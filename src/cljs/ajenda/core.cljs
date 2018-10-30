@@ -31,10 +31,10 @@
   (some-> (rename-keys model-event {:id :_id})
           (clj->js)))
 
-(defn save-event [calendar id event]
+(defn save-event [calendar id model-event event]
   (if event
     (do
-      (doseq [[k v] (select-keys event [:start :end :tip :title])]
+      (doseq [[k v] (select-keys model-event [:start :end :tip :title :description])]
         (goog.object/set event (name k) (clj->js v)))
       (.fullCalendar calendar "updateEvent" event))
     (.fullCalendar calendar "removeEvents" id)))
@@ -45,8 +45,8 @@
   (fn [event js-event view]
     (let [id (.-_id event)]
       (if sync?
-        (save-event calendar id (f (keyword id) view))
-        (f (keyword id) view (fn [event] (save-event calendar id event)))))))
+        (save-event calendar id (f (keyword id) view) vent)
+        (f (keyword id) view (fn [model-event] (save-event calendar id model-event event)))))))
 
 (defn wrap-event-render
   "calls the select function and paints the event with the result"
