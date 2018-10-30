@@ -45,7 +45,7 @@
   (fn [event js-event view]
     (let [id (.-_id event)]
       (if sync?
-        (save-event calendar id (f (keyword id) view) vent)
+        (save-event calendar id (f (keyword id) view) event)
         (f (keyword id) view (fn [model-event] (save-event calendar id model-event event)))))))
 
 (defn wrap-event-render
