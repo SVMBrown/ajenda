@@ -12,6 +12,9 @@
 (defn js->clj-keywordized [v]
   (js->clj v :keywordize-keys true))
 
+(defn calendar-node [view]
+  (-> view .-calendar .-el))
+
 (defn ->camel-case [s]
   (string/replace s #"-{1,}\b." #(when-let [c (last %)] (.toUpperCase c))))
 
@@ -45,7 +48,7 @@
   (fn [event js-event view]
     (let [id (.-_id event)]
       (if sync?
-        (save-event calendar id (f (keyword id) view) event)
+        (save-event calendar id (f (keyword id) js-event view) event)
         (f (keyword id) view (fn [model-event] (save-event calendar id model-event event)))))))
 
 (defn wrap-event-render
@@ -56,15 +59,15 @@
 
 (defn wrap-mouseover [calendar f sync?]
   (fn [event js-event view]
-    (f (parse-event event) view)))
+    (f (parse-event event) js-event view)))
 
 (defn wrap-select [calendar f sync?]
   (if sync?
     (fn [start end js-event view]
-      (when-let [event (f start end view)]
+      (when-let [event (f start end js-event view)]
         (.fullCalendar calendar "renderEvent" (unparse-event event))))
     (fn [start end js-event view]
-      (f start end view
+      (f start end js-event view
          (fn [event]
            (when event
              (.fullCalendar calendar "renderEvent" (unparse-event event))))))))
