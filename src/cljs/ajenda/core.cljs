@@ -49,7 +49,7 @@
     (let [id (.-_id event)]
       (if sync?
         (save-event calendar id (f (keyword id) js-event view) event)
-        (f (keyword id) view (fn [model-event] (save-event calendar id model-event event)))))))
+        (f (keyword id) view js-event (fn [model-event] (save-event calendar id model-event event)))))))
 
 (defn wrap-event-render
   "calls the select function and paints the event with the result"

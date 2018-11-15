@@ -1,4 +1,4 @@
-(defproject ajenda "0.1.6"
+(defproject ajenda "0.1.7"
   :description "A Reagent Wrapper for Full Calendar "
   :url "https://github.com/SVMBrown/ajenda"
   :license {:name "MIT"
