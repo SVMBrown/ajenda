@@ -35,7 +35,7 @@
           (clj->js)))
 
 (defn save-event [calendar id model-event event]
-  (if event
+  (if model-event
     (do
       (doseq [[k v] (select-keys model-event [:start :end :tip :title :description])]
         (goog.object/set event (name k) (clj->js v)))
