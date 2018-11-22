@@ -2,7 +2,8 @@
 
 #?(:cljs
 
-   (defn go-to-date [calendar-id date]
+   (defn go-to-date
      "Calls fullCalendar gotoDate method expecting date in yyyy-mm-dd form."
-     (let [calendar (js/$ calendar-id)]
+     [calendar-id date]
+     (let [calendar (js/$ (str "#" calendar-id))]
        (.fullCalendar calendar "gotoDate" date))))
