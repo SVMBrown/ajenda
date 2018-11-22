@@ -1,6 +1,8 @@
 (ns ajenda.util)
 
-(defn foo-cljc [x]
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+#?(:cljs
+
+   (defn go-to-date [calendar-id date]
+     "Calls fullCalendar gotoDate method expecting date in yyyy-mm-dd form."
+     (let [calendar (js/$ calendar-id)]
+       (.fullCalendar calendar "gotoDate" date))))

@@ -133,10 +133,6 @@
                                (-> this $ (.fullCalendar "render")))
      :component-will-unmount (fn [this]
                                (-> this $ (.fullCalendar "destroy")))
-     :reagent-render         (fn [_] [:div#myFullCalendar.calendar])}))
-
-;; fullCalendar methods
-(defn fc-go-to-date [date]
-  "Calls fullCalendar gotoDate method expecting date in yyyy-mm-dd form."
-  (let [calendar (js/$ "#myFullCalendar")]
-    (.fullCalendar calendar "gotoDate" date)))
+     :reagent-render         (fn [_] (if-let [id (:id opts)]
+                                       [:div.calendar {:id id}]
+                                       [:div.calendar]))}))
