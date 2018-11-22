@@ -133,4 +133,6 @@
                                (-> this $ (.fullCalendar "render")))
      :component-will-unmount (fn [this]
                                (-> this $ (.fullCalendar "destroy")))
-     :reagent-render         (fn [_] [:div.calendar])}))
+     :reagent-render         (fn [_] (if-let [id (:id opts)]
+                                       [:div.calendar {:id id}]
+                                       [:div.calendar]))}))
