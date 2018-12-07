@@ -123,15 +123,23 @@
       (camel-case-event-keys)
       (clj->js)))
 
-(defn calendar [opts]
+(defn calendar [{:keys [calendar-instance] :as opts}]
   (r/create-class
     {:display-name           "calendar"
      :component-did-mount    (fn [this]
                                (let [calendar ($ this)]
+                                 (when calendar-instance
+                                   (reset! calendar-instance calendar))
                                  (.fullCalendar calendar (parse-opts calendar opts))))
      :component-did-update   (fn [this _]
-                               (-> this $ (.fullCalendar "render")))
+
+                               (let [calendar ($ this)]
+                                 (when calendar-instance
+                                   (reset! calendar-instance calendar))
+                                 (.fullCalendar calendar "render")))
      :component-will-unmount (fn [this]
+                               (when calendar-instance
+                                 (reset! calendar-instance nil))
                                (-> this $ (.fullCalendar "destroy")))
      :reagent-render         (fn [_] (if-let [id (:id opts)]
                                        [:div.calendar {:id id}]
