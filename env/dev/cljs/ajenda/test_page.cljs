@@ -66,55 +66,112 @@
                            (.close @node))}
              "close"]]))})))
 
+#_(defn home-page [events]
+    [:div
+     [popover]
+     [:button
+      {:on-click #(swap! events assoc :baz {:id    "event-3"
+                                            :title "Test 3"
+                                            :start (js/Date.)
+                                            :tip   "tip3"})}
+      "add event"]
+     [ajenda/calendar
+      {:header          {:left   "prev, next today"
+                         :center "title"
+                         :right  "month,agendaWeek,agendaDay"}
+       :editable        true
+       :droppable       true
+       :selectable      true
+       :events          (fn [start end timezone callback]
+                          (callback (event-map-to-list @events)))
+       :event-render    (fn [event element view]
+                          (.attr element "title" (:tip event)))
+       :event-click     (fn [id view js-event save-cb]
+                          (println "id" id)
+                          (let [model-event (get @events id)]
+                            (println "model event" model-event)
+                            (reset! event-details {:event model-event :save save-cb})))
+       #_#_:event-click-sync (fn [id view]
+                               (let [model-event (get @events id)]
+                                 (println model-event)
+                                 model-event))
+       :event-mouseover (fn [& args] #_(println "hello"))
+       :event-drop      (fn [& args]
+                          (println "dropped" args))
+       :select          (fn [start end js-event sview cb]
+                          (let [event (make-draggable
+                                        {:id    (keyword (str (.getTime (js/Date.))))
+                                         :title (str "Test " (rand-int 1000))
+                                         :start start
+                                         :end   end
+                                         :tip   "tip1"})]
+                            (add-event! events event)
+                            (cb event)))
+       :select-sync     (fn [start end view]
+                          (let [event {:id    (keyword (str (.getTime (js/Date.))))
+                                       :title (str "Test " (rand-int 1000))
+                                       :start start
+                                       :end   end
+                                       :tip   "tip1"}]
+                            (add-event! events event)
+                            event))}]
+
+     #_[:p (str @events)]])
+
+(def calendar-instance (atom nil))
+
 (defn home-page [events]
   [:div
    [popover]
    [:button
-    {:on-click #(swap! events assoc :baz {:id    "event-3"
-                                          :title "Test 3"
-                                          :start (js/Date.)
-                                          :tip   "tip3"})}
+    {:on-click (fn []
+                 (swap! events assoc :baz {:id    "event-3"
+                                           :title "Test 3"
+                                           :start (js/Date.)
+                                           :tip   "tip3"})
+                 (.fullCalendar @calendar-instance "refetchEvents"))}
     "add event"]
    [ajenda/calendar
-    {:header          {:left   "prev, next today"
-                       :center "title"
-                       :right  "month,agendaWeek,agendaDay"}
-     :editable        true
-     :droppable       true
-     :selectable      true
-     :events          (fn [start end timezone callback]
-                        (callback (event-map-to-list @events)))
-     :event-render    (fn [event element view]
-                        (.attr element "title" (:tip event)))
-     :event-click     (fn [id view js-event save-cb]
-                        (println "id" id)
-                        (let [model-event (get @events id)]
-                          (println "model event" model-event)
-                          (reset! event-details {:event model-event :save save-cb})))
+    {:calendar-instance calendar-instance
+     :header            {:left   "prev, next today"
+                         :center "title"
+                         :right  "month,agendaWeek,agendaDay"}
+     :editable          true
+     :droppable         true
+     :selectable        true
+     :events            (fn [start end timezone callback]
+                          (callback (event-map-to-list @events)))
+     :event-render      (fn [event element view]
+                          (.attr element "title" (:tip event)))
+     :event-click       (fn [id view js-event save-cb]
+                          (println "id" id)
+                          (let [model-event (get @events id)]
+                            (println "model event" model-event)
+                            (reset! event-details {:event model-event :save save-cb})))
      #_#_:event-click-sync (fn [id view]
                              (let [model-event (get @events id)]
                                (println model-event)
                                model-event))
-     :event-mouseover (fn [& args] #_(println "hello"))
-     :event-drop      (fn [& args]
-                        (println "dropped" args))
-     :select          (fn [start end js-event sview cb]
-                        (let [event (make-draggable
-                                      {:id    (keyword (str (.getTime (js/Date.))))
+     :event-mouseover   (fn [& args] #_(println "hello"))
+     :event-drop        (fn [& args]
+                          (println "dropped" args))
+     :select            (fn [start end js-event sview cb]
+                          (let [event (make-draggable
+                                        {:id    (keyword (str (.getTime (js/Date.))))
+                                         :title (str "Test " (rand-int 1000))
+                                         :start start
+                                         :end   end
+                                         :tip   "tip1"})]
+                            (add-event! events event)
+                            (cb event)))
+     :select-sync       (fn [start end view]
+                          (let [event {:id    (keyword (str (.getTime (js/Date.))))
                                        :title (str "Test " (rand-int 1000))
                                        :start start
                                        :end   end
-                                       :tip   "tip1"})]
-                          (add-event! events event)
-                          (cb event)))
-     :select-sync     (fn [start end view]
-                        (let [event {:id    (keyword (str (.getTime (js/Date.))))
-                                     :title (str "Test " (rand-int 1000))
-                                     :start start
-                                     :end   end
-                                     :tip   "tip1"}]
-                          (add-event! events event)
-                          event))}]
+                                       :tip   "tip1"}]
+                            (add-event! events event)
+                            event))}]
 
    #_[:p (str @events)]])
 
