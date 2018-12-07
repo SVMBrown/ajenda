@@ -66,9 +66,15 @@
                            (.close @node))}
              "close"]]))})))
 
-(defn home-page []
+(defn home-page [events]
   [:div
    [popover]
+   [:button
+    {:on-click #(swap! events assoc :baz {:id    "event-3"
+                                          :title "Test 3"
+                                          :start (js/Date.)
+                                          :tip   "tip3"})}
+    "add event"]
    [ajenda/calendar
     {:header          {:left   "prev, next today"
                        :center "title"
@@ -80,7 +86,7 @@
                         (callback (event-map-to-list @events)))
      :event-render    (fn [event element view]
                         (.attr element "title" (:tip event)))
-     :event-click     (fn [id view save-cb]
+     :event-click     (fn [id view js-event save-cb]
                         (println "id" id)
                         (let [model-event (get @events id)]
                           (println "model event" model-event)
@@ -92,7 +98,7 @@
      :event-mouseover (fn [& args] #_(println "hello"))
      :event-drop      (fn [& args]
                         (println "dropped" args))
-     :select          (fn [start end view cb]
+     :select          (fn [start end js-event sview cb]
                         (let [event (make-draggable
                                       {:id    (keyword (str (.getTime (js/Date.))))
                                        :title (str "Test " (rand-int 1000))
@@ -113,7 +119,7 @@
    #_[:p (str @events)]])
 
 (defn mount-root []
-  (r/render [home-page] (.getElementById js/document "app")))
+  (r/render [home-page events] (.getElementById js/document "app")))
 
 (defn init! []
   (mount-root))
