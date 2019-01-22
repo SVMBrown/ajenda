@@ -1,6 +1,8 @@
 # ajenda
 
-This is the ajenda project.
+Ajenda is a Reagent wrapper for [FullCalendar](https://fullcalendar.io/).
+
+[![Clojars Project](https://img.shields.io/clojars/v/ajenda.svg)](https://clojars.org/ajenda)
 
 ## Development mode
 
