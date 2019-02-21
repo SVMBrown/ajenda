@@ -13,7 +13,7 @@
   (js->clj v :keywordize-keys true))
 
 (defn calendar-node [view]
-  (-> view .-calendar .-el))
+  (-> view (aget "calendar") (aget "el")))
 
 (defn ->camel-case [s]
   (string/replace s #"-{1,}\b." #(when-let [c (last %)] (.toUpperCase c))))
@@ -46,7 +46,7 @@
   "removes the event from calendar when the click handler returns nil"
   [calendar f sync?]
   (fn [event js-event view]
-    (let [id (.-_id event)]
+    (let [id (aget event "_id")]
       (if sync?
         (save-event calendar id (f (keyword id) view js-event) event)
         (f (keyword id) view js-event (fn [model-event] (save-event calendar id model-event event)))))))
